@@ -47,14 +47,8 @@ func main() {
 
 	gray := makeGray(src)
 
-	//kernel := [][]int {
-	//	{-1, -1, -1, -1, -1, -1},
-	//	{-1, -1, -1, -1, -1, -1},
-	//	{5, 5, 5, 5, 5, 5},
-	//	{5, 5, 5, 5, 5, 5},
-	//	{-1, -1, -1, -1, -1, -1},
-	//	{-1, -1, -1, -1, -1, -1},
-	//}
+	// create integral image
+	integral := integralImage(gray)
 
 	min, max := -1, 2
 
@@ -91,6 +85,41 @@ func main() {
 	fmt.Printf("shit took about: %s", elapsed)
 }
 
+func integralImage(img *image.Gray) [][]int {
+	bounds := img.Bounds()
+	w, h := bounds.Max.X, bounds.Max.Y
+
+	integral := make([][]int, w)
+	for i := range a {
+		a[i] = make([]int, h)
+	}
+
+	integral[0][0] = int(img.GrayAt(0, 0))
+
+	// First pass
+	for x := 1; x < w; x++ {
+		integral[x][0] = integral[x-1][0] + int(img.GrayAt(x, 0))
+	}
+
+	// First pass
+	for y := 1; y < h; y++ {
+		integral[0][y] = integral[0][y-1] + int(img.GrayAt(y, 0))
+	}
+
+	for y := 1; y < h; y++ {
+		for x := 1; x < w; x++ {
+			diag := integral[x-1][y-1]
+			top := integral[x][y-1]
+			left := integral[x-1][y]
+			me := int(img.GrayAt(x, y))
+
+			integral[x][y] = top + left + me - diag
+		}
+	}
+
+	return integral
+}
+
 func convolutionAt(kernel [][]int, img *image.Gray, centerX int, centerY int) int {
 	sum := 0
 	kernelTotal := 0
@@ -109,7 +138,5 @@ func convolutionAt(kernel [][]int, img *image.Gray, centerX int, centerY int) in
 	}
 	result := sum / kernelTotal
 
-	//s := fmt.Sprintf("centerX: %d, centerY: %d, sum: %d,	kernelTotal: %d, result: %d", centerX, centerY, sum, kernelTotal, result)
-	//fmt.Println(s)
 	return result
 }
