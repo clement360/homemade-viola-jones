@@ -30,7 +30,7 @@ func makeGray(src image.Image) (*image.Gray) {
 func main() {
 	start := time.Now()
 
-	infile, err := os.Open("giant.png")
+	infile, err := os.Open("test1.png")
 	if err != nil {
 		// replace this with real error handling
 		panic(err)
